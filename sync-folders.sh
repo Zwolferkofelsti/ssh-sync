@@ -2,9 +2,18 @@
 
 sync_directories() {
   if [ -z "${REMOTE_PASS}" ]; then
-    rsync -avz --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+    rsync -avz --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh -p ${REMOTE_PORT}" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
   else
     sshpass -p "${REMOTE_PASS}" rsync -avz --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+  fi
+}
+
+check_host() {
+  nc -q 0 -w 1 "${REMOTE_HOST} ${REMOTE_PORT}"
+
+  if [ "$?" -ne 0 ]; then
+    echo "Unable to reach remote host ${REMOTE_HOST} on port ${REMOTE_PORT}."
+    exit 1
   fi
 }
 
@@ -17,6 +26,7 @@ Options:
   -u, --remote-user=USER        Remote SSH user
   -p, --remote-pass=PASSWORD    Remote SSH password (optional)
   -h, --remote-host=HOST        Remote SSH host
+  -o, --remote-port=port        Remote SSH port (default: 22)
   -d, --remote-dir=DIR          Remote directory to sync to (default: /shared)
   -e, --exclude=PATTERNS        Comma-separated list of file/folder patterns to exclude
   --help                        Show this help message and exit
@@ -40,6 +50,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     -h|--remote-host=*)
       REMOTE_HOST="${1#*=}"
+      shift
+      ;;
+    -o|--remote-port=*)
+      REMOTE_PORT="${1#*=}"
       shift
       ;;
     -d|--remote-dir=*)
@@ -66,6 +80,7 @@ LOCAL_DIR=${LOCAL_DIR:-${SSH_SYNC_LOCAL_DIR:-$PWD}}
 REMOTE_USER=${REMOTE_USER:-${SSH_SYNC_REMOTE_USER}}
 REMOTE_PASS=${REMOTE_PASS:-${SSH_SYNC_REMOTE_PASS}}
 REMOTE_HOST=${REMOTE_HOST:-${SSH_SYNC_REMOTE_HOST}}
+REMOTE_PORT=${REMOTE_PORT:-${SSH_SYNC_REMOTE_PORT:22}}
 REMOTE_DIR=${REMOTE_DIR:-${SSH_SYNC_REMOTE_DIR:-/ssh-sync}}
 
 EXCLUDE_FILE=$(mktemp)
@@ -79,7 +94,10 @@ if [ -z "${LOCAL_DIR}" ] || [ -z "${REMOTE_USER}" ] || [ -z "${REMOTE_HOST}" ]; 
   exit 1
 fi
 
-echo "Running initial sync, local dir: $LOCAL_DIR; remote dir: $REMOTE_DIR"
+echo "Confirming remote host is reachable..."
+check_host
+
+echo "Running initial sync, local dir: ${LOCAL_DIR}; remote dir: ${REMOTE_DIR}"
 sync_directories
 sync_result=$?
 

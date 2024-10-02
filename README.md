@@ -17,6 +17,7 @@ ssh-sync-folders [OPTIONS]
 - `-u`, --remote-user=USER: Remote SSH user
 - `-p`, --remote-pass=PASSWORD: Remote SSH password (optional)
 - `-h`, --remote-host=HOST: Remote SSH host
+- `-o`, --remote-port=PORT: Remote SSH port (default: 22)
 - `-d`, --remote-dir=DIR: Remote directory to sync to (default: /shared)
 - `-e`, --exclude=PATTERNS: Comma-separated list of file/folder patterns to exclude
 
@@ -35,6 +36,7 @@ Configure the following environment variables before running the script, unless 
 - `SSH_SYNC_REMOTE_USER`: Remote SSH user
 - `SSH_SYNC_REMOTE_PASS`: Remote SSH password (optional if using RSA keys)
 - `SSH_SYNC_REMOTE_HOST`: Remote SSH host
+- `SSH_SYNC_REMOTE_PORT`: Remote SSH port
 - `SSH_SYNC_REMOTE_DIR`: Remote directory to sync to
 - `SSH_SYNC_EXCLUDE_PATTERNS`: Comma-separated list of file/folder patterns to exclude
 
@@ -42,6 +44,7 @@ Configure the following environment variables before running the script, unless 
 
 - `rsync`
 - `inotify-tools`
+- `netcat`
 - `sshpass` (optional, required if using a remote password)
 
 ## Installation
