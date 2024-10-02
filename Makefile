@@ -10,12 +10,14 @@ configure:
 	read -p "Enter remote SSH user: " remote_user; \
 	read -p "Enter remote SSH password (optional): " remote_pass; \
 	read -p "Enter remote SSH host: " remote_host; \
+	read -p "Enter remote SSH port (default: 22): " remote_port; \
 	read -p "Enter remote directory (default: /shared): " remote_dir; \
 	read -p "Enter comma-separated exclude patterns (optional): " exclude_patterns; \
 	echo "export SSH_SYNC_LOCAL_DIR=$$local_dir" >> ~/.bashrc; \
 	echo "export SSH_SYNC_REMOTE_USER=$$remote_user" >> ~/.bashrc; \
 	echo "export SSH_SYNC_REMOTE_PASS=$$remote_pass" >> ~/.bashrc; \
 	echo "export SSH_SYNC_REMOTE_HOST=$$remote_host" >> ~/.bashrc; \
+	echo "export SSH_SYNC_REMOTE_PORT=$$remote_port" >> ~/.bashrc; \
 	echo "export SSH_SYNC_REMOTE_DIR=$$remote_dir" >> ~/.bashrc; \
 	echo "export SSH_SYNC_EXCLUDE_PATTERNS=$$exclude_patterns" >> ~/.bashrc; \
 	exec bash; \
