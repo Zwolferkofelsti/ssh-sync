@@ -109,7 +109,10 @@ fi
 echo "Initial sync done."
 
 echo "[ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ]"
-while inotifywait -r -e modify,create,delete,move "${LOCAL_DIR}"; do
+
+inotifywait -qmr -e 'modify,create,delete,move' --format '%w%f%0' --no-newline "${LOCAL_DIR}" |\
+while IFS= read -r -d '' FILE; do
+  echo "Change in ${LOCAL_DIR} (${FILE}), synchronizing..."
   sync_directories
 done
 
