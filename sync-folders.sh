@@ -9,7 +9,7 @@ sync_directories() {
 }
 
 check_host() {
-  nc -q 0 -w 1 "${REMOTE_HOST} ${REMOTE_PORT}"
+  nc -q 0 -w 1 "${REMOTE_HOST}" "${REMOTE_PORT}"
 
   if [ "$?" -ne 0 ]; then
     echo "Unable to reach remote host ${REMOTE_HOST} on port ${REMOTE_PORT}."
@@ -80,7 +80,7 @@ LOCAL_DIR=${LOCAL_DIR:-${SSH_SYNC_LOCAL_DIR:-$PWD}}
 REMOTE_USER=${REMOTE_USER:-${SSH_SYNC_REMOTE_USER}}
 REMOTE_PASS=${REMOTE_PASS:-${SSH_SYNC_REMOTE_PASS}}
 REMOTE_HOST=${REMOTE_HOST:-${SSH_SYNC_REMOTE_HOST}}
-REMOTE_PORT=${REMOTE_PORT:-${SSH_SYNC_REMOTE_PORT:22}}
+REMOTE_PORT=${REMOTE_PORT:-${SSH_SYNC_REMOTE_PORT:-22}}
 REMOTE_DIR=${REMOTE_DIR:-${SSH_SYNC_REMOTE_DIR:-/ssh-sync}}
 
 EXCLUDE_FILE=$(mktemp)
