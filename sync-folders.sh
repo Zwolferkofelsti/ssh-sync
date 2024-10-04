@@ -2,14 +2,14 @@
 
 sync_directories() {
   if [ -z "${REMOTE_PASS}" ]; then
-    rsync -avz --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh -p ${REMOTE_PORT}" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+    rsync -avzq --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh -p ${REMOTE_PORT}" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
   else
-    sshpass -p "${REMOTE_PASS}" rsync -avz --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+    sshpass -p "${REMOTE_PASS}" rsync -avzq --delete --exclude-from="${EXCLUDE_FILE}" -e "ssh" "$LOCAL_DIR" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
   fi
 }
 
 check_host() {
-  nc -q 0 -w 1 "${REMOTE_HOST}" "${REMOTE_PORT}"
+  nc -q0 -w1 -d "${REMOTE_HOST}" "${REMOTE_PORT}"
 
   if [ "$?" -ne 0 ]; then
     echo "Unable to reach remote host ${REMOTE_HOST} on port ${REMOTE_PORT}."
@@ -99,20 +99,15 @@ check_host
 
 echo "Running initial sync, local dir: ${LOCAL_DIR}; remote dir: ${REMOTE_DIR}"
 sync_directories
-sync_result=$?
 
-if [ $sync_result -ne 0 ]; then
+if [ "$?" -ne 0 ]; then
   echo "Initial sync failed. Exiting."
   exit 1
 fi
 
 echo "Initial sync done."
 
-echo "[ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ]"
-
-inotifywait -qmr -e 'modify,create,delete,move' --format '%w%f%0' --no-newline "${LOCAL_DIR}" |\
-while IFS= read -r -d '' FILE; do
-  echo "Change in ${LOCAL_DIR} (${FILE}), synchronizing..."
+while inotifywait -qr -e 'modify,create,delete,move' "${LOCAL_DIR}"; do
   sync_directories
 done
 
